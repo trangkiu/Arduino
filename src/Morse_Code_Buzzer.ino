@@ -1,10 +1,8 @@
 /*
  * Arduino Morse Code Buzzer
- * Converts text to Morse code from user input via serial monitor and plays it through a buzzer
- 
- * Board: 
+ * Converts text to Morse code and plays it through a buzzer
+  * Board: 
    Passive buzzer : - G , pin 3
-      
  */
 const int buzzerPin = 3;
 const int buzzerSound = 100;  // Duration in milliseconds
@@ -52,22 +50,22 @@ void loop() {
     String input = Serial.readStringUntil('\n');
     input.trim();
     input.toLowerCase();
-    if(isReading){
-       Serial.println("Playing: " + input);
+    
+    Serial.println("Playing: " + input);
        for(int i = 0; i < input.length(); i++){
           if(input[i] == ' '){
             space();
-            Serial.println(" ");
+            Serial.print(" ");
           } else {
             int* morseCode = mapChar(input[i]);
             if(morseCode != nullptr){
               convert(morseCode);
             }
           }
-         Serial.println("/");
+         Serial.print("/");
       }
-      Serial.println("Finished playing");
-    }
+    Serial.println();
+    Serial.println("Finished playing");
     isReading = false;  
     delay(2000); 
   }
@@ -113,10 +111,10 @@ void convert(int* morseCode){
   while(morseCode[i] != -1){ 
     if(morseCode[i] == 0){
       dot();
-      Serial.println(".");
+      Serial.print(".");
     } else if(morseCode[i] == 1){
       dash();
-      Serial.println("-");
+      Serial.print("-");
     }
     i++;
   }
