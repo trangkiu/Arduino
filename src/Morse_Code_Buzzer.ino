@@ -1,12 +1,16 @@
 /*
  * Arduino Morse Code Buzzer
- * Converts text to Morse code and plays it through a buzzer
+ * Converts text to Morse code from user input via serial monitor and plays it through a buzzer
+ 
+ * Board: 
+   Passive buzzer : - G , pin 3
+      
  */
 const int buzzerPin = 3;
 const int buzzerSound = 100;  // Duration in milliseconds
 const int pauseBetweenChar = 200;
 const int pauseBetweenWords = 500;
-boolean isReading = true;
+boolean isReading = false;
 
 // Character map: 0 = dot, 1 = dash 
 int a[] = {0,1,-1}; 
@@ -42,24 +46,33 @@ void setup() {
 }
 
 void loop() {
-  String input = "hello world";  
-  
-  if(isReading){
-     Serial.println("Playing: " + input);
-     for(int i = 0; i < input.length(); i++){
-        if(input[i] == ' '){
-          space();
-        } else {
-          int* morseCode = mapChar(input[i]);
-          if(morseCode != nullptr){
-            convert(morseCode);
+   
+  if (Serial.available() && !isReading) {
+    isReading = true;  
+    String input = Serial.readStringUntil('\n');
+    input.trim();
+    input.toLowerCase();
+    if(isReading){
+       Serial.println("Playing: " + input);
+       for(int i = 0; i < input.length(); i++){
+          if(input[i] == ' '){
+            space();
+            Serial.println(" ");
+          } else {
+            int* morseCode = mapChar(input[i]);
+            if(morseCode != nullptr){
+              convert(morseCode);
+            }
           }
-        }
+         Serial.println("/");
+      }
+      Serial.println("Finished playing");
     }
-    Serial.println("Finished playing");
+    isReading = false;  
+    delay(2000); 
   }
-  isReading = false;  
-  delay(2000);  
+
+   
 }
 
 int* mapChar(char input){
@@ -100,8 +113,10 @@ void convert(int* morseCode){
   while(morseCode[i] != -1){ 
     if(morseCode[i] == 0){
       dot();
+      Serial.println(".");
     } else if(morseCode[i] == 1){
       dash();
+      Serial.println("-");
     }
     i++;
   }
