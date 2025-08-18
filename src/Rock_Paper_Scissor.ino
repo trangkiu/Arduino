@@ -7,7 +7,7 @@
 #define SCREEN_ADDRESS 0x3C
 
 #define FRAME_DELAY (20)
-#define COUNTER_DELAY (1000)
+#define COUNTER_DELAY (700)
 #define FRAME_ANIMATOR_WIDTH (50)
 #define FRAME_ANIMATOR_HEIGHT (50)
 #define FRAME_NUM_WIDTH (50)
@@ -604,7 +604,7 @@ int num_spriteX = 65;
 int num_spriteY = 13;
 
 int frame = 0;
-int counter = 0; 
+int timeCounter = -1; 
 boolean isPlaying = false;
 unsigned long shakeTime = 0;
 unsigned long countTime = 0;
@@ -645,13 +645,11 @@ void loop() {
 			reset();
 		}
   } 
-	//delay(100);
-
 			
 }
 
 void reset(){
-	counter = -1; 
+	timeCounter = -1; 
 	pushCounter = 0; 
 	isPlaying = false;
 	shakeTime = 0;
@@ -664,24 +662,27 @@ void play(){
 	unsigned long currentTime = millis();
 	if(isPlaying){
 			int frameLength = 0;
-			if (currentTime - shakeTime >= FRAME_DELAY && counter < 3) {
-				
-				drawAnimation (-1 , frame);
-				drawNumber(counter);
-				display.display();
-				frameLength =  getFrameLength(-1);
-				frame = (frame + 1) % frameLength;
-				shakeTime = currentTime;
-
+			// Counting
+			if(getGameStage() == 0){
+				if (currentTime - shakeTime >= FRAME_DELAY ) {			
+					drawAnimation (-1 , frame);
+					drawNumber(timeCounter);
+					display.display();
+					frameLength =  getFrameLength(-1);
+					frame = (frame + 1) % frameLength;
+					shakeTime = currentTime;
   		}
 
-			if (currentTime - countTime >= COUNTER_DELAY && counter < 3) {		
-				counter++;
-				countTime = currentTime;		
-  		}
+				if (currentTime - countTime >= COUNTER_DELAY ) {		
+					timeCounter++;
+					countTime = currentTime;		
+				}
+
+			}
+			
 
 			
-			if(counter >= 3){
+			if(getGameStage() == 1){
 					clearNumberScreen();
 					display.drawBitmap(num_spriteX, num_spriteY, go, FRAME_NUM_WIDTH, FRAME_NUM_HEIGHT, 1 );
 
@@ -742,4 +743,12 @@ void clearNumberScreen(){
 
 void clearAnimationScreen(){
 	display.fillRect(ani_spriteX, ani_spriteY,FRAME_ANIMATOR_WIDTH, FRAME_ANIMATOR_HEIGHT, BLACK);
+}
+
+int getGameStage(){
+	if(timeCounter < 3){
+		return 0; // counting stage
+	} else {
+		return 1; // result stage
+	}
 }
